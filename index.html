@@ -15,7 +15,11 @@
         document.querySelector('button').onclick = function() {
           var inputValue = document.getElementById('userInput').value;
           var dynamicUrl = "https://" + inputValue;
-          if (win) {
+          if (win && !win.closed) {
+            var iframe = win.document.querySelector('iframe');
+            if (iframe) {
+              iframe.src = dynamicUrl;
+            }
             win.focus();
           } else {
             win = window.open();
