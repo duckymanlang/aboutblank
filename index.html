@@ -4,16 +4,17 @@
   </head>
  
   <body>
-    <label for="fname">First name:</label>
-  <input type="text" id="fname" name="fname"><br><br>
+    <input type="text" id="userInput">
     <button>click this</button>
     <script>
       var urlObj = new window.URL(window.location.href);
       var url = "https://crazygames.com"; //this is the link, replace it with your own
-      if (url) {
-        var win;
- 
+      var win;
+
+      window.onload = function() {
         document.querySelector('button').onclick = function() {
+          var inputValue = document.getElementById('userInput').value;
+          var dynamicUrl = "https://" + inputValue;
           if (win) {
             win.focus();
           } else {
@@ -25,13 +26,13 @@
             iframe.style.width = '100%';
             iframe.style.height = '100%';
             iframe.style.margin = '0';
-            iframe.src = url;
+            iframe.src = dynamicUrl;
             win.document.body.appendChild(iframe);
           }
           document.querySelector('button').style.bacground = 'grey';
           document.querySelector('button').innerHTML = "Already Open";
         };
-      }
+      };
  
     </script>
   </body>
