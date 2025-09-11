@@ -1,11 +1,82 @@
 <html>
  
   <head>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap');
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background: #181A1B;
+        color: #ECECEC;
+        font-family: 'Inter', Arial, sans-serif;
+        min-height: 100vh;
+      }
+      .header {
+        font-family: 'Inter', Arial, sans-serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        text-align: center;
+        letter-spacing: 0.06em;
+        margin-top: 2.5rem;
+        margin-bottom: 2.5rem;
+        color: #ffffff;
+        text-shadow: 0 2px 24px #0a0a0a60;
+      }
+      #userInput {
+        background: #23272A;
+        border: 1px solid #373B3E;
+        color: #ECECEC;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        outline: none;
+        transition: border 0.2s;
+        margin-right: 1rem;
+      }
+      #userInput:focus {
+        border: 1.5px solid #7289DA;
+      }
+      button {
+        background: #5865F2;
+        color: #ECECEC;
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        font-family: 'Inter', Arial, sans-serif;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 2px 16px #0002;
+        transition: background 0.2s, color 0.2s;
+      }
+      button:hover {
+        background: #4752C4;
+        color: #fff;
+      }
+      .center-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        min-height: 100vh;
+      }
+      .input-group {
+        margin-top: 2rem;
+        display: flex;
+        gap: 1rem;
+      }
+    </style>
   </head>
  
   <body>
-    <input type="text" id="userInput">
-    <button>click this</button>
+    <div class="center-content">
+      <div class="header">Porject Ultra</div>
+      <div class="input-group">
+        <input type="text" id="userInput">
+        <button>click this</button>
+      </div>
+    </div>
     <script>
       var urlObj = new window.URL(window.location.href);
       var url = "https://crazygames.com"; //this is the link, replace it with your own
