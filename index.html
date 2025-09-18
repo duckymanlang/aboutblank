@@ -26,7 +26,7 @@
         align-items: center;
         min-height: 100vh;
       }
-      #g_id_onload, .g_id_signin {
+      #gSignIn {
         margin-top: 2.5rem;
       }
       .input-group {
@@ -72,6 +72,7 @@
         text-align: center;
       }
     </style>
+    <!-- Load the Google Identity Services script -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
   </head>
   <body>
@@ -84,9 +85,8 @@
       // --- CONFIGURATION ---
       const CLIENT_ID = "100317754160-4p89mb56cqqv8547slbmabpcfuq39lit.apps.googleusercontent.com";
       const allowedEmails = [
-        "jensengeorge1290@gmail.com",
-        ""
-        // add more emails here
+        "jensengeorge1290@gmail.com"
+        // Add more authorized emails here
       ];
 
       // Helper to decode JWT (for Google Identity Services ID token)
@@ -108,39 +108,45 @@
         }
       }
 
-      // Insert the Google Sign-In button and initialize the flow
-      window.onload = function() {
-        window.handleCredentialResponse = function(response) {
-          const payload = parseJwt(response.credential);
-          if (!payload.email) {
-            showError("Google sign-in failed.");
-            return;
-          }
-          if (allowedEmails.includes(payload.email)) {
-            openAboutBlankApp();
-          } else {
-            showError("This account is not authorized.");
-          }
-        };
+      // Callback for Google Identity Services
+      function handleCredentialResponse(response) {
+        const payload = parseJwt(response.credential);
+        if (!payload.email) {
+          showError("Google sign-in failed.");
+          return;
+        }
+        if (allowedEmails.includes(payload.email)) {
+          showError(""); // Hide error if previously shown
+          openAboutBlankApp();
+        } else {
+          showError("This account is not authorized.");
+        }
+      }
 
-        // Add the Google button
-        const gDiv = document.getElementById('gSignIn');
-        gDiv.innerHTML = `
-          <div id="g_id_onload"
-            data-client_id="${CLIENT_ID}"
-            data-callback="handleCredentialResponse"
-            data-auto_prompt="false"
-            ></div>
-          <div class="g_id_signin"
-            data-type="standard"
-            data-shape="rectangular"
-            data-theme="filled_blue"
-            data-text="sign_in_with"
-            data-size="large"
-            data-logo_alignment="left">
-          </div>
-        `;
-      };
+      // Render the Google Sign-In button after the script is loaded
+      function renderGoogleButton() {
+        if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
+          setTimeout(renderGoogleButton, 100);
+          return;
+        }
+        google.accounts.id.initialize({
+          client_id: CLIENT_ID,
+          callback: handleCredentialResponse
+        });
+        google.accounts.id.renderButton(
+          document.getElementById("gSignIn"),
+          {
+            theme: "filled_blue",
+            size: "large",
+            text: "signin_with",
+            logo_alignment: "left"
+          }
+        );
+        // google.accounts.id.prompt(); // Uncomment to show One Tap UI
+      }
+
+      // Call to render the Google button
+      renderGoogleButton();
 
       function openAboutBlankApp() {
         const win = window.open('about:blank', '_blank');
