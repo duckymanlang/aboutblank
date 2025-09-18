@@ -55,9 +55,6 @@
         display: flex;
         gap: 1rem;
       }
-      .hidden {
-        display: none !important;
-      }
     </style>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
   </head>
@@ -77,22 +74,9 @@
         Sign in with Google
       </button>
     </div>
-    <div id="fullSite" class="hidden">
-      <div class="center-content">
-        <div class="header">Project Ultra</div>
-        <div class="input-group">
-          <h2>by duckyman</h2>
-          <br>
-          <h2>some big sites might not work, like google and youtube. sorry, im working on it</h2>
-          <br>
-          <input type="text" id="userInput">
-          <button id="goBtn">click this</button>
-        </div>
-      </div>
-    </div>
     <script>
       // Replace with your Google OAuth Client ID
-      const CLIENT_ID = "100317754160-4p89mb56cqqv8547slbmabpcfuq39lit.apps.googleusercontent.com"; // <--- PUT YOUR CLIENT ID HERE
+      const CLIENT_ID = ""; // <--- PUT YOUR CLIENT ID HERE
 
       let tokenClient = null;
       window.onload = function() {
@@ -102,7 +86,6 @@
           scope: 'openid email profile',
           callback: (tokenResponse) => {
             if (tokenResponse && tokenResponse.access_token) {
-              // Open about:blank and load the whole site in an iframe
               openFullSiteInBlank();
             }
           }
@@ -112,60 +95,182 @@
           tokenClient.requestAccessToken();
         };
 
-        // Setup input/button event for the full site (if loaded directly)
-        setupInputBtn();
+        // If loaded with #fullsite, run the main app logic
+        if (window.location.hash === "#fullsite") {
+          showFullApp();
+        }
       };
 
       function openFullSiteInBlank() {
         const win = window.open('about:blank', '_blank');
         if (win) {
-          win.document.body.style.margin = '0';
-          win.document.body.style.height = '100vh';
-          const iframe = win.document.createElement('iframe');
-          iframe.style.border = 'none';
-          iframe.style.width = '100vw';
-          iframe.style.height = '100vh';
-          iframe.style.margin = '0';
-          iframe.src = window.location.href + "#fullsite";
-          win.document.body.appendChild(iframe);
+          win.document.write(`<!DOCTYPE html>
+<html>
+  <head>
+    <title>Project Ultra</title>
+    <style>
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background: #181A1B;
+        color: #ECECEC;
+        font-family: 'Inter', Roboto, sans-serif;
+        min-height: 100vh;
+      }
+      .header {
+        font-size: 2.5rem;
+        font-weight: 700;
+        text-align: center;
+        margin-top: 2.5rem;
+        margin-bottom: 2.5rem;
+        color: #fff;
+        text-shadow: 0 2px 24px #0a0a0a60;
+      }
+      .center-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+      }
+      .input-group {
+        margin-top: 2rem;
+        display: flex;
+        gap: 1rem;
+      }
+      #userInput {
+        background: #23272A;
+        border: 1px solid #373B3E;
+        color: #ECECEC;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        outline: none;
+        transition: border 0.2s;
+        margin-right: 1rem;
+      }
+      #userInput:focus {
+        border: 1.5px solid #7289DA;
+      }
+      button {
+        background: #5865F2;
+        color: #ECECEC;
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        font-family: 'Inter', Roboto, sans-serif;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 2px 16px #0002;
+        transition: background 0.2s, color 0.2s;
+      }
+      button:hover {
+        background: #4752C4;
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="center-content">
+      <div class="header">Project Ultra</div>
+      <div class="input-group">
+        <h2>by duckyman</h2>
+        <br>
+        <h2>some big sites might not work, like google and youtube. sorry, im working on it</h2>
+        <br>
+        <input type="text" id="userInput">
+        <button id="goBtn">click this</button>
+      </div>
+    </div>
+    <script>
+      var urlObj = new window.URL(window.location.href);
+      var url = "https://crazygames.com"; //this is the link, replace it with your own
+      var win;
+      var lastUrl = "";
+
+      document.getElementById('userInput').oninput = function() {
+        var currentUrl = this.value;
+        if (currentUrl !== lastUrl) {
+          document.getElementById('goBtn').style.background = '';
+          document.getElementById('goBtn').innerHTML = "click this";
+        }
+      };
+
+      document.getElementById('goBtn').onclick = function() {
+        var inputValue = document.getElementById('userInput').value;
+        var dynamicUrl = "https://" + inputValue;
+        win = window.open();
+        win.document.body.style.margin = '0';
+        win.document.body.style.height = '100vh';
+        var iframe = win.document.createElement('iframe');
+        iframe.style.border = 'none';
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.margin = '0';
+        iframe.src = dynamicUrl;
+        win.document.body.appendChild(iframe);
+        lastUrl = inputValue;
+        document.getElementById('goBtn').style.background = 'grey';
+        document.getElementById('goBtn').innerHTML = "click this";
+      };
+    <\/script>
+  </body>
+</html>`);
+          win.document.close();
         } else {
           alert("Popup blocked! Please allow popups for this site.");
         }
       }
 
-      // If loaded with #fullsite, show the full site UI only
-      if (window.location.hash === "#fullsite") {
-        document.getElementById("mainPage").classList.add("hidden");
-        document.getElementById("fullSite").classList.remove("hidden");
-      }
+      function showFullApp() {
+        // Remove mainPage if present
+        var mainPage = document.getElementById("mainPage");
+        if (mainPage) mainPage.style.display = "none";
 
-      function setupInputBtn() {
-        document.addEventListener("DOMContentLoaded", function () {
-          const btn = document.getElementById('goBtn');
-          const input = document.getElementById('userInput');
-          if (btn && input) {
-            input.oninput = function () {
-              btn.style.background = '';
-              btn.innerHTML = "click this";
-            };
-            btn.onclick = function () {
-              var inputValue = input.value;
-              var dynamicUrl = "https://" + inputValue;
-              var win = window.open();
-              win.document.body.style.margin = '0';
-              win.document.body.style.height = '100vh';
-              var iframe = win.document.createElement('iframe');
-              iframe.style.border = 'none';
-              iframe.style.width = '100%';
-              iframe.style.height = '100%';
-              iframe.style.margin = '0';
-              iframe.src = dynamicUrl;
-              win.document.body.appendChild(iframe);
-              btn.style.background = 'grey';
-              btn.innerHTML = "click this";
-            };
+        // Build the full app UI dynamically in this window
+        document.body.innerHTML = `
+        <div class="center-content">
+          <div class="header">Project Ultra</div>
+          <div class="input-group">
+            <h2>by duckyman</h2>
+            <br>
+            <h2>some big sites might not work, like google and youtube. sorry, im working on it</h2>
+            <br>
+            <input type="text" id="userInput">
+            <button id="goBtn">click this</button>
+          </div>
+        </div>
+        `;
+        // Re-attach main JS functionality
+        var win;
+        var lastUrl = "";
+        var input = document.getElementById('userInput');
+        var btn = document.getElementById('goBtn');
+        input.oninput = function() {
+          var currentUrl = this.value;
+          if (currentUrl !== lastUrl) {
+            btn.style.background = '';
+            btn.innerHTML = "click this";
           }
-        });
+        };
+        btn.onclick = function() {
+          var inputValue = input.value;
+          var dynamicUrl = "https://" + inputValue;
+          win = window.open();
+          win.document.body.style.margin = '0';
+          win.document.body.style.height = '100vh';
+          var iframe = win.document.createElement('iframe');
+          iframe.style.border = 'none';
+          iframe.style.width = '100%';
+          iframe.style.height = '100%';
+          iframe.style.margin = '0';
+          iframe.src = dynamicUrl;
+          win.document.body.appendChild(iframe);
+          lastUrl = inputValue;
+          btn.style.background = 'grey';
+          btn.innerHTML = "click this";
+        };
       }
     </script>
   </body>
