@@ -26,29 +26,8 @@
         align-items: center;
         min-height: 100vh;
       }
-      .google-btn {
+      #g_id_onload, .g_id_signin {
         margin-top: 2.5rem;
-        background: #fff;
-        color: #444;
-        border: 1px solid #ddd;
-        box-shadow: 0 2px 4px #0002;
-        font-weight: 600;
-        font-size: 1.1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.8em;
-        padding: 0.7em 2em;
-        border-radius: 6px;
-        cursor: pointer;
-        transition: background 0.2s, color 0.2s, border 0.2s;
-      }
-      .google-btn:hover {
-        background: #f7f7f7;
-        border: 1px solid #aaa;
-      }
-      .google-icon {
-        width: 1.6em;
-        height: 1.6em;
       }
       .input-group {
         margin-top: 2rem;
@@ -98,29 +77,16 @@
   <body>
     <div class="center-content" id="mainPage">
       <div class="header">Project Ultra</div>
-      <button class="google-btn" id="googleSignInBtn" type="button">
-        <svg class="google-icon" viewBox="0 0 48 48">
-          <g>
-            <path fill="#4285F4" d="M24 9.5c3.54 0 6.46 1.22 8.61 3.21l6.41-6.41C34.97 2.61 29.93 0 24 0 14.61 0 6.44 5.51 2.33 13.44l7.91 6.14C12.12 13.05 17.59 9.5 24 9.5z"/>
-            <path fill="#34A853" d="M46.1 24.36c0-1.5-.14-2.94-.4-4.36H24v8.26h12.38c-.53 2.84-2.12 5.23-4.54 6.85l7.01 5.47C42.92 37.96 46.1 31.7 46.1 24.36z"/>
-            <path fill="#FBBC05" d="M9.24 28.44a14.5 14.5 0 0 1 0-8.88l-7.91-6.14A23.94 23.94 0 0 0 0 24c0 3.88.92 7.56 2.33 10.58l7.91-6.14z"/>
-            <path fill="#EA4335" d="M24 48c6.48 0 11.92-2.15 15.89-5.87l-7.01-5.47c-1.95 1.32-4.44 2.09-8.88 2.09-6.41 0-11.89-3.55-14.77-8.72l-7.91 6.14C6.44 42.49 14.61 48 24 48z"/>
-            <path fill="none" d="M0 0h48v48H0z"/>
-          </g>
-        </svg>
-        Sign in with Google
-      </button>
+      <div id="gSignIn"></div>
       <div id="errorMsg" class="error" style="display:none;"></div>
     </div>
     <script>
-      // Replace with your actual client id
+      // --- CONFIGURATION ---
       const CLIENT_ID = "100317754160-4p89mb56cqqv8547slbmabpcfuq39lit.apps.googleusercontent.com";
-
-      // List of allowed Google emails
       const allowedEmails = [
         "jensengeorge1290@gmail.com",
-        "person2@gmail.com"
-        // Add more allowed emails here
+        ""
+        // add more emails here
       ];
 
       // Helper to decode JWT (for Google Identity Services ID token)
@@ -132,36 +98,6 @@
         }
       }
 
-      let tokenClient = null;
-      window.onload = function() {
-        tokenClient = google.accounts.oauth2.initTokenClient({
-          client_id: CLIENT_ID,
-          scope: 'openid email profile',
-          callback: (tokenResponse) => {
-            // Use the ID token to get the email
-            if (tokenResponse && tokenResponse.id_token) {
-              const userInfo = parseJwt(tokenResponse.id_token);
-              const userEmail = userInfo.email;
-              if (allowedEmails.includes(userEmail)) {
-                openAboutBlankApp();
-              } else {
-                showError("This Google account is not authorized.");
-              }
-            } else {
-              showError("Google sign-in failed, try again.");
-            }
-          },
-          // IMPORTANT: set response_type to 'id_token token' to get id_token (for email)
-          response_type: 'id_token token'
-        });
-
-        document.getElementById('googleSignInBtn').onclick = function() {
-          // Remove any previous error
-          showError("");
-          tokenClient.requestAccessToken({prompt: ''});
-        };
-      };
-
       function showError(msg) {
         const err = document.getElementById('errorMsg');
         if (!msg) {
@@ -171,6 +107,40 @@
           err.style.display = "";
         }
       }
+
+      // Insert the Google Sign-In button and initialize the flow
+      window.onload = function() {
+        window.handleCredentialResponse = function(response) {
+          const payload = parseJwt(response.credential);
+          if (!payload.email) {
+            showError("Google sign-in failed.");
+            return;
+          }
+          if (allowedEmails.includes(payload.email)) {
+            openAboutBlankApp();
+          } else {
+            showError("This account is not authorized.");
+          }
+        };
+
+        // Add the Google button
+        const gDiv = document.getElementById('gSignIn');
+        gDiv.innerHTML = `
+          <div id="g_id_onload"
+            data-client_id="${CLIENT_ID}"
+            data-callback="handleCredentialResponse"
+            data-auto_prompt="false"
+            ></div>
+          <div class="g_id_signin"
+            data-type="standard"
+            data-shape="rectangular"
+            data-theme="filled_blue"
+            data-text="sign_in_with"
+            data-size="large"
+            data-logo_alignment="left">
+          </div>
+        `;
+      };
 
       function openAboutBlankApp() {
         const win = window.open('about:blank', '_blank');
