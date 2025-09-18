@@ -1,5 +1,4 @@
 <html>
- 
   <head>
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap');
@@ -13,111 +12,161 @@
         min-height: 100vh;
       }
       .header {
-        font-family: 'Inter', Roboto, sans-serif;
         font-size: 2.5rem;
         font-weight: 700;
         text-align: center;
-        letter-spacing: 0.035em;
         margin-top: 2.5rem;
         margin-bottom: 2.5rem;
-        color: #ffffff;
-        text-shadow: 0 2px 24px #0a0a0a60;
-      }
-      #userInput {
-        background: #23272A;
-        border: 1px solid #373B3E;
-        color: #ECECEC;
-        border-radius: 8px;
-        padding: 0.75rem 1rem;
-        font-size: 1rem;
-        outline: none;
-        transition: border 0.2s;
-        margin-right: 1rem;
-      }
-      #userInput:focus {
-        border: 1.5px solid #7289DA;
-      }
-      button {
-        background: #5865F2;
-        color: #ECECEC;
-        border: none;
-        border-radius: 8px;
-        padding: 0.75rem 1.5rem;
-        font-size: 1rem;
-        font-family: 'Inter', Roboto, sans-serif;
-        font-weight: 700;
-        cursor: pointer;
-        box-shadow: 0 2px 16px #0002;
-        transition: background 0.2s, color 0.2s;
-      }
-      button:hover {
-        background: #4752C4;
         color: #fff;
+        text-shadow: 0 2px 24px #0a0a0a60;
       }
       .center-content {
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: flex-start;
         min-height: 100vh;
+      }
+      .google-btn {
+        margin-top: 2.5rem;
+        background: #fff;
+        color: #444;
+        border: 1px solid #ddd;
+        box-shadow: 0 2px 4px #0002;
+        font-weight: 600;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.8em;
+        padding: 0.7em 2em;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.2s, color 0.2s, border 0.2s;
+      }
+      .google-btn:hover {
+        background: #f7f7f7;
+        border: 1px solid #aaa;
+      }
+      .google-icon {
+        width: 1.6em;
+        height: 1.6em;
       }
       .input-group {
         margin-top: 2rem;
         display: flex;
         gap: 1rem;
       }
+      .hidden {
+        display: none !important;
+      }
     </style>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
   </head>
- 
   <body>
-    <div class="center-content">
+    <div class="center-content" id="mainPage">
       <div class="header">Project Ultra</div>
-      <div class="input-group"
-       <h2>by duckyman</h2>
-       <br>
-       <h2>some big sites might not work, like google and youtube. sorry, im working on it</h2>
-       <br>
-        <input type="text" id="userInput">
-        <button>click this</button>
+      <button class="google-btn" id="googleSignInBtn" type="button">
+        <svg class="google-icon" viewBox="0 0 48 48">
+          <g>
+            <path fill="#4285F4" d="M24 9.5c3.54 0 6.46 1.22 8.61 3.21l6.41-6.41C34.97 2.61 29.93 0 24 0 14.61 0 6.44 5.51 2.33 13.44l7.91 6.14C12.12 13.05 17.59 9.5 24 9.5z"/>
+            <path fill="#34A853" d="M46.1 24.36c0-1.5-.14-2.94-.4-4.36H24v8.26h12.38c-.53 2.84-2.12 5.23-4.54 6.85l7.01 5.47C42.92 37.96 46.1 31.7 46.1 24.36z"/>
+            <path fill="#FBBC05" d="M9.24 28.44a14.5 14.5 0 0 1 0-8.88l-7.91-6.14A23.94 23.94 0 0 0 0 24c0 3.88.92 7.56 2.33 10.58l7.91-6.14z"/>
+            <path fill="#EA4335" d="M24 48c6.48 0 11.92-2.15 15.89-5.87l-7.01-5.47c-1.95 1.32-4.44 2.09-8.88 2.09-6.41 0-11.89-3.55-14.77-8.72l-7.91 6.14C6.44 42.49 14.61 48 24 48z"/>
+            <path fill="none" d="M0 0h48v48H0z"/>
+          </g>
+        </svg>
+        Sign in with Google
+      </button>
+    </div>
+    <div id="fullSite" class="hidden">
+      <div class="center-content">
+        <div class="header">Project Ultra</div>
+        <div class="input-group">
+          <h2>by duckyman</h2>
+          <br>
+          <h2>some big sites might not work, like google and youtube. sorry, im working on it</h2>
+          <br>
+          <input type="text" id="userInput">
+          <button id="goBtn">click this</button>
+        </div>
       </div>
     </div>
     <script>
-      var urlObj = new window.URL(window.location.href);
-      var url = "https://crazygames.com"; //this is the link, replace it with your own
-      var win;
-      var lastUrl = "";
+      // Replace with your Google OAuth Client ID
+      const CLIENT_ID = "100317754160-4p89mb56cqqv8547slbmabpcfuq39lit.apps.googleusercontent.com"; // <--- PUT YOUR CLIENT ID HERE
 
+      let tokenClient = null;
       window.onload = function() {
-        document.getElementById('userInput').oninput = function() {
-          var currentUrl = this.value;
-          if (currentUrl !== lastUrl) {
-            document.querySelector('button').style.background = '';
-            document.querySelector('button').innerHTML = "click this";
+        // Google OAuth2 button setup
+        tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: CLIENT_ID,
+          scope: 'openid email profile',
+          callback: (tokenResponse) => {
+            if (tokenResponse && tokenResponse.access_token) {
+              // Open about:blank and load the whole site in an iframe
+              openFullSiteInBlank();
+            }
           }
+        });
+
+        document.getElementById('googleSignInBtn').onclick = function() {
+          tokenClient.requestAccessToken();
         };
 
-        document.querySelector('button').onclick = function() {
-          var inputValue = document.getElementById('userInput').value;
-          var dynamicUrl = "https://" + inputValue;
-          
-          win = window.open();
+        // Setup input/button event for the full site (if loaded directly)
+        setupInputBtn();
+      };
+
+      function openFullSiteInBlank() {
+        const win = window.open('about:blank', '_blank');
+        if (win) {
           win.document.body.style.margin = '0';
           win.document.body.style.height = '100vh';
-          var iframe = win.document.createElement('iframe');
+          const iframe = win.document.createElement('iframe');
           iframe.style.border = 'none';
-          iframe.style.width = '100%';
-          iframe.style.height = '100%';
+          iframe.style.width = '100vw';
+          iframe.style.height = '100vh';
           iframe.style.margin = '0';
-          iframe.src = dynamicUrl;
+          iframe.src = window.location.href + "#fullsite";
           win.document.body.appendChild(iframe);
-          
-          lastUrl = inputValue;
-          document.querySelector('button').style.bacground = 'grey';
-          document.querySelector('button').innerHTML = "click this";
-        };
-      };
- 
+        } else {
+          alert("Popup blocked! Please allow popups for this site.");
+        }
+      }
+
+      // If loaded with #fullsite, show the full site UI only
+      if (window.location.hash === "#fullsite") {
+        document.getElementById("mainPage").classList.add("hidden");
+        document.getElementById("fullSite").classList.remove("hidden");
+      }
+
+      function setupInputBtn() {
+        document.addEventListener("DOMContentLoaded", function () {
+          const btn = document.getElementById('goBtn');
+          const input = document.getElementById('userInput');
+          if (btn && input) {
+            input.oninput = function () {
+              btn.style.background = '';
+              btn.innerHTML = "click this";
+            };
+            btn.onclick = function () {
+              var inputValue = input.value;
+              var dynamicUrl = "https://" + inputValue;
+              var win = window.open();
+              win.document.body.style.margin = '0';
+              win.document.body.style.height = '100vh';
+              var iframe = win.document.createElement('iframe');
+              iframe.style.border = 'none';
+              iframe.style.width = '100%';
+              iframe.style.height = '100%';
+              iframe.style.margin = '0';
+              iframe.src = dynamicUrl;
+              win.document.body.appendChild(iframe);
+              btn.style.background = 'grey';
+              btn.innerHTML = "click this";
+            };
+          }
+        });
+      }
     </script>
   </body>
- 
 </html>
